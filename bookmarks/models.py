@@ -1,10 +1,17 @@
 import json
 import requests
+from urllib.parse import urlparse
 from opengraph_py3 import OpenGraph
 from dragnet import extract_content
 from dragnet.blocks import BlockifyError
 from django.db import models
 from django.contrib.auth.models import User
+
+import favicon.favicon
+from favicon.favicon import tags as favicon_tags
+favicon.favicon.META_TAGS = []
+
+from pprint import pprint
 
 
 class Bookmark(models.Model):
@@ -19,6 +26,18 @@ class Bookmark(models.Model):
     @property
     def status_code(self):
         return self.snapshots.first().status_code if self.snapshots.exists() else None
+
+    @property
+    def domain(self):
+        return urlparse(self.url).hostname
+
+    @property
+    def description(self):
+        return self.snapshots.first().opengraph.get('description') if self.snapshots.exists() else None
+
+    @property
+    def favicon(self):
+        return self.snapshots.first().favicon if self.snapshots.exists() else None
 
     def save_snapshot(self):
         try:
@@ -49,6 +68,14 @@ class Bookmark(models.Model):
             print("BlockifyError")
             pass
 
+        try:
+            tags = favicon_tags(self.url, r.text)
+            tags = sorted(tags, key=lambda i: i.width + i.height, reverse=True)
+            snapshot["favicon"] = tags[0].url
+        except IndexError:
+            print("No Favicon Found")
+            pass
+
         return Snapshot.objects.create(**snapshot)
 
     def __str__(self):
@@ -68,6 +95,7 @@ class Snapshot(models.Model):
     parsed_content = models.TextField(blank=True)
     status_code = models.IntegerField(blank=True)
     opengraph_json = models.TextField(blank=True)
+    favicon = models.URLField(blank=True)
 
     @property
     def headers(self):

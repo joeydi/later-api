@@ -9,7 +9,10 @@ class BookmarkSerializer(serializers.ModelSerializer):
             "id",
             "created_at",
             "url",
+            "domain",
             "title",
+            "description",
             "selection",
             "folder",
+            "favicon",
         ]

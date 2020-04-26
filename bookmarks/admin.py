@@ -9,6 +9,7 @@ class SnapshotAdmin(admin.ModelAdmin):
     date_hierarchy = 'created_at'
     list_display = [
         'status_code',
+        'favicon',
         'created_at',
     ]
 
