@@ -10,9 +10,7 @@ from django.contrib.auth.models import User
 class Bookmark(models.Model):
     created_at = models.DateTimeField()
     updated_at = models.DateTimeField()
-    user = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name="bookmarks"
-    )
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="bookmarks")
     url = models.URLField()
     title = models.CharField(blank=True, max_length=255)
     selection = models.CharField(blank=True, max_length=255)
@@ -26,27 +24,29 @@ class Bookmark(models.Model):
         try:
             r = requests.get(self.url)
         except requests.exceptions.SSLError:
-            print('SSLError')
+            print("SSLError")
             return None
 
         snapshot = {
-            'bookmark': self,
-            'content': r.text,
-            'headers_json': json.dumps({item[0]: item[1] for item in r.headers.items()}),
-            'status_code': r.status_code,
+            "bookmark": self,
+            "content": r.text,
+            "headers_json": json.dumps(
+                {item[0]: item[1] for item in r.headers.items()}
+            ),
+            "status_code": r.status_code,
         }
 
         try:
             ogp = OpenGraph(html=r.content)
-            snapshot['opengraph_json'] = ogp.to_json()
+            snapshot["opengraph_json"] = ogp.to_json()
         except AttributeError:
-            print('OpenGraph Error')
+            print("OpenGraph Error")
             pass
 
         try:
-            snapshot['parsed_content'] = extract_content(r.content)
+            snapshot["parsed_content"] = extract_content(r.content)
         except BlockifyError:
-            print('BlockifyError')
+            print("BlockifyError")
             pass
 
         return Snapshot.objects.create(**snapshot)
