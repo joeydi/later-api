@@ -42,3 +42,13 @@ class ArchiveViewSet(generics.ListAPIView):
         user = self.request.user
         return user.bookmarks.filter(folder="Archive")
 
+
+class TagViewSet(generics.ListAPIView):
+    serializer_class = BookmarkSerializer
+    permission_classes = [permissions.IsAuthenticated, IsOwner]
+
+    def get_queryset(self):
+        user = self.request.user
+        tag = self.kwargs['tag']
+        return user.bookmarks.filter(tags__name__in=[tag])
+

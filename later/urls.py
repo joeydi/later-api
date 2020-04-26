@@ -7,6 +7,7 @@ from bookmarks.views import (
     UnreadViewSet,
     StarredViewSet,
     ArchiveViewSet,
+    TagViewSet
 )
 
 router = routers.DefaultRouter()
@@ -19,5 +20,6 @@ urlpatterns = [
     path("bookmarks/unread/", UnreadViewSet.as_view()),
     path("bookmarks/starred/", StarredViewSet.as_view()),
     path("bookmarks/archive/", ArchiveViewSet.as_view()),
+    path("bookmarks/tag/<tag>/", TagViewSet.as_view()),
     path("", include(router.urls)),
 ]
