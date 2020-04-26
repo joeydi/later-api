@@ -5,26 +5,40 @@ from .permissions import IsOwner
 
 
 class BookmarkViewSet(viewsets.ModelViewSet):
-    queryset = Bookmark.objects.all()
     serializer_class = BookmarkSerializer
     permission_classes = [permissions.IsAuthenticated, IsOwner]
+
+    def get_queryset(self):
+        user = self.request.user
+        return user.bookmarks.all()
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
 
 
 class UnreadViewSet(generics.ListAPIView):
-    queryset = Bookmark.objects.filter(folder='Unread')
     serializer_class = BookmarkSerializer
     permission_classes = [permissions.IsAuthenticated, IsOwner]
 
+    def get_queryset(self):
+        user = self.request.user
+        return user.bookmarks.filter(folder="Unread")
+
+
 class StarredViewSet(generics.ListAPIView):
-    queryset = Bookmark.objects.filter(folder='Starred')
     serializer_class = BookmarkSerializer
     permission_classes = [permissions.IsAuthenticated, IsOwner]
+
+    def get_queryset(self):
+        user = self.request.user
+        return user.bookmarks.filter(folder="Starred")
 
 
 class ArchiveViewSet(generics.ListAPIView):
-    queryset = Bookmark.objects.filter(folder='Archive')
     serializer_class = BookmarkSerializer
     permission_classes = [permissions.IsAuthenticated, IsOwner]
+
+    def get_queryset(self):
+        user = self.request.user
+        return user.bookmarks.filter(folder="Archive")
+

@@ -9,7 +9,7 @@ from bookmarks.views import (
 )
 
 router = routers.DefaultRouter()
-router.register(r"bookmarks", BookmarkViewSet)
+router.register(r"bookmarks", BookmarkViewSet, basename="bookmarks")
 
 urlpatterns = [
     path("admin/", admin.site.urls),
