@@ -15,7 +15,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **kwargs):
         # Get the next 100 Bookmarks that don't have a Snapshot
-        bookmarks = Bookmark.objects.annotate(Count('snapshots')).filter(snapshots__count=0)[:1000]
+        bookmarks = Bookmark.objects.annotate(Count('snapshots')).filter(snapshots__count=0)[:100]
 
         for bookmark in bookmarks:
             self.stdout.write(self.style.SUCCESS('Saving Snapshot for Bookmark: "%s"' % bookmark.title))

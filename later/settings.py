@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     "corsheaders",
     "rest_framework",
     "rest_framework.authtoken",
+    "taggit",
     "bookmarks",
 ]
 
@@ -84,6 +85,8 @@ REST_FRAMEWORK = {
 }
 
 CORS_ORIGIN_ALLOW_ALL = True
+
+TAGGIT_CASE_INSENSITIVE = True
 
 # Database
 # https://docs.djangoproject.com/en/2.0/ref/settings/#databases

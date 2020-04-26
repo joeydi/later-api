@@ -3,6 +3,8 @@ from .models import Bookmark
 
 
 class BookmarkSerializer(serializers.ModelSerializer):
+    tags = serializers.StringRelatedField(many=True)
+
     class Meta:
         model = Bookmark
         fields = [
@@ -15,4 +17,5 @@ class BookmarkSerializer(serializers.ModelSerializer):
             "selection",
             "folder",
             "favicon",
+            "tags"
         ]

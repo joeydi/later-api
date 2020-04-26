@@ -6,9 +6,11 @@ from dragnet import extract_content
 from dragnet.blocks import BlockifyError
 from django.db import models
 from django.contrib.auth.models import User
+from taggit.managers import TaggableManager
 
 import favicon.favicon
 from favicon.favicon import tags as favicon_tags
+
 favicon.favicon.META_TAGS = []
 
 from pprint import pprint
@@ -22,6 +24,7 @@ class Bookmark(models.Model):
     title = models.CharField(blank=True, max_length=255)
     selection = models.CharField(blank=True, max_length=255)
     folder = models.CharField(blank=True, max_length=255)
+    tags = TaggableManager()
 
     @property
     def status_code(self):
@@ -33,7 +36,11 @@ class Bookmark(models.Model):
 
     @property
     def description(self):
-        return self.snapshots.first().opengraph.get('description') if self.snapshots.exists() else None
+        return (
+            self.snapshots.first().opengraph.get("description")
+            if self.snapshots.exists()
+            else None
+        )
 
     @property
     def favicon(self):
@@ -65,7 +72,8 @@ class Bookmark(models.Model):
         try:
             snapshot["parsed_content"] = extract_content(r.content)
         except BlockifyError:
-            print("BlockifyError")
+            print("dragnet extract_content: BlockifyError")
+            snapshot["parsed_content"] = ""
             pass
 
         try:
@@ -75,6 +83,19 @@ class Bookmark(models.Model):
         except IndexError:
             print("No Favicon Found")
             pass
+
+        from bookmarks.utils import TextRank4Keyword
+
+        tr4w = TextRank4Keyword()
+        tr4w.analyze(snapshot["parsed_content"])
+        keywords_weighted = tr4w.node_weight.items()
+        tags = [
+            k.lower()
+            for k, v in sorted(
+                keywords_weighted, key=lambda item: item[1], reverse=True
+            )
+        ]
+        self.tags.add(*tags[:9])
 
         return Snapshot.objects.create(**snapshot)
 
