@@ -32,8 +32,9 @@ class StatusCodeFilter(SimpleListFilter):
         return [(code, code) for code in status_codes]
 
     def queryset(self, request, queryset):
-        with_status_code = Count('snapshots', filter=Q(snapshots__status_code=self.value()))
-        queryset = queryset.annotate(status_code_count=with_status_code).filter(status_code_count__gt=0)
+        if self.value():
+            with_status_code = Count('snapshots', filter=Q(snapshots__status_code=self.value()))
+            queryset = queryset.annotate(status_code_count=with_status_code).filter(status_code_count__gt=0)
         return queryset
 
 

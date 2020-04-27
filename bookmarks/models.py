@@ -49,8 +49,10 @@ class Bookmark(models.Model):
     def save_snapshot(self):
         try:
             r = requests.get(self.url)
-        except requests.exceptions.SSLError:
-            print("SSLError")
+        except (requests.exceptions.SSLError,
+                requests.exceptions.ConnectionError,
+                requests.exceptions.ReadTimeout) as e:
+            print(e)
             return None
 
         snapshot = {
