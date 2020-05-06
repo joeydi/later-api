@@ -9,6 +9,7 @@ from bookmarks.views import (
     ArchiveListAPIView,
     CommonTagsListAPIView,
     TagListAPIView,
+    SearchListAPIView,
 )
 
 urlpatterns = [
@@ -22,4 +23,5 @@ urlpatterns = [
     path("bookmarks/archive/", ArchiveListAPIView.as_view()),
     path("bookmarks/tag/", CommonTagsListAPIView.as_view()),
     path("bookmarks/tag/<tag>/", TagListAPIView.as_view()),
+    path("bookmarks/search/<query>/", SearchListAPIView.as_view()),
 ]

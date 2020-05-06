@@ -60,4 +60,18 @@ class CommonTagsListAPIView(generics.ListAPIView):
 
     def get_queryset(self):
         user = self.request.user
-        return Bookmark.tags.most_common(extra_filters={'bookmark__user': user})
+        return Bookmark.tags.most_common(extra_filters={"bookmark__user": user})
+
+
+class SearchListAPIView(generics.ListAPIView):
+    serializer_class = BookmarkSerializer
+    permission_classes = [permissions.IsAuthenticated, IsOwner]
+
+    def get_queryset(self):
+        user = self.request.user
+        query = self.kwargs["query"]
+        # results = user.bookmarks.annotate(search=SearchVector("title"),).filter(
+        #     search=query
+        # )
+
+        return user.bookmarks.filter(title__search=query)

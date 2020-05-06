@@ -20,9 +20,9 @@ class Bookmark(models.Model):
     created_at = models.DateTimeField()
     updated_at = models.DateTimeField()
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="bookmarks")
-    url = models.URLField()
+    url = models.URLField(max_length=2048)
     title = models.CharField(blank=True, max_length=255)
-    selection = models.CharField(blank=True, max_length=255)
+    selection = models.TextField(blank=True)
     folder = models.CharField(blank=True, max_length=255)
     tags = TaggableManager()
 
@@ -82,6 +82,7 @@ class Bookmark(models.Model):
             tags = favicon_tags(self.url, r.text)
             tags = sorted(tags, key=lambda i: i.width + i.height, reverse=True)
             snapshot["favicon"] = tags[0].url
+            print(snapshot["favicon"])
         except IndexError:
             print("No Favicon Found")
             pass
@@ -118,7 +119,7 @@ class Snapshot(models.Model):
     parsed_content = models.TextField(blank=True)
     status_code = models.IntegerField(blank=True)
     opengraph_json = models.TextField(blank=True)
-    favicon = models.URLField(blank=True)
+    favicon = models.URLField(blank=True, max_length=2048)
 
     @property
     def headers(self):
