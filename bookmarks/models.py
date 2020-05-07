@@ -134,7 +134,7 @@ class Snapshot(models.Model):
 
     @property
     def opengraph(self):
-        return json.loads(self.opengraph_json)
+        return json.loads(self.opengraph_json) if self.opengraph_json else None
 
     def __str__(self):
         return self.bookmark.title
