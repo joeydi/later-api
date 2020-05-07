@@ -88,18 +88,21 @@ class Bookmark(models.Model):
             print("No Favicon Found")
             pass
 
-        from bookmarks.utils import TextRank4Keyword
-
-        tr4w = TextRank4Keyword()
-        tr4w.analyze(snapshot["parsed_content"])
-        keywords_weighted = tr4w.node_weight.items()
-        tags = [
-            k.lower()
-            for k, v in sorted(
-                keywords_weighted, key=lambda item: item[1], reverse=True
-            )
-        ]
-        self.tags.add(*tags[:9])
+        try:
+            from bookmarks.utils import TextRank4Keyword
+            tr4w = TextRank4Keyword()
+            tr4w.analyze(snapshot["parsed_content"])
+            keywords_weighted = tr4w.node_weight.items()
+            tags = [
+                k.lower()
+                for k, v in sorted(
+                    keywords_weighted, key=lambda item: item[1], reverse=True
+                )
+            ]
+            self.tags.add(*tags[:9])
+        except MemoryError:
+            print("MemoryError while parsing keywords")
+            pass
 
         return Snapshot.objects.create(**snapshot)
 
