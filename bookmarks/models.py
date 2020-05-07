@@ -101,9 +101,20 @@ class Bookmark(models.Model):
             print("MemoryError while parsing keywords")
             pass
 
-        document = document_fromstring(r.text)
-        self.title = document.find(".//title").text
-        self.save()
+        # If the bookmark does not yet have a title, grab it from the document title
+        if not self.title:
+            try:
+                document = document_fromstring(r.text)
+                self.title = document.find(".//title").text
+                self.save()
+            except AttributeError:
+                print("No title tag found...")
+                pass
+
+        # If we still don't have a title, grab it from the opengraph tags
+        if not self.title and ogp.get("title"):
+            self.title = ogp.get("title")
+            self.save()
 
         return Snapshot.objects.create(**snapshot)
 
