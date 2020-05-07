@@ -29,7 +29,7 @@ SECRET_KEY = "!__frpr4uvk&0rv9gay^@0*#ddrwb0mtm6#@lkp$#q8)4v6vm$"
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = env.list('ALLOWED_HOSTS')
 
 
 # Application definition
@@ -82,7 +82,7 @@ WSGI_APPLICATION = "later.wsgi.application"
 
 REST_FRAMEWORK = {
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
-    "PAGE_SIZE": 100,
+    "PAGE_SIZE": 20,
     "DEFAULT_AUTHENTICATION_CLASSES": [
         "rest_framework.authentication.SessionAuthentication",
         "rest_framework.authentication.TokenAuthentication",
