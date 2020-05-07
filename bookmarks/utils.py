@@ -1,7 +1,10 @@
+import re
 from collections import OrderedDict
+from bs4 import BeautifulSoup
 import numpy as np
 import spacy
 from spacy.lang.en.stop_words import STOP_WORDS
+from opengraph_py3 import OpenGraph
 
 nlp = spacy.load('en_core_web_sm')
 
@@ -132,3 +135,25 @@ class TextRank4Keyword():
             node_weight[word] = pr[index]
 
         self.node_weight = node_weight
+
+
+class LaterOpenGraph(OpenGraph):
+    def parser(self, html):
+        """
+        """
+        if not isinstance(html,BeautifulSoup):
+            doc = BeautifulSoup(html, features="lxml")
+        else:
+            doc = html
+        ogs = doc.html.head.findAll(property=re.compile(r'^og'))
+        for og in ogs:
+            if og.has_attr('content'):
+                self[og['property'][3:]]=og['content']
+        # Couldn't fetch all attrs from og tags, try scraping body
+        if not self.is_valid() and self.scrape:
+            for attr in self.required_attrs:
+                if not self.valid_attr(attr):
+                    try:
+                        self[attr] = getattr(self, 'scrape_%s' % attr)(doc)
+                    except AttributeError:
+                        pass

@@ -1,20 +1,16 @@
 import json
 import requests
+from lxml.html import document_fromstring
 from urllib.parse import urlparse
-from opengraph_py3 import OpenGraph
 from dragnet import extract_content
 from dragnet.blocks import BlockifyError
 from django.db import models
 from django.dispatch import receiver
 from django.contrib.auth.models import User
 from taggit.managers import TaggableManager
-
-import favicon.favicon
 from favicon.favicon import tags as favicon_tags
 
-favicon.favicon.META_TAGS = []
-
-from pprint import pprint
+from .utils import TextRank4Keyword, LaterOpenGraph
 
 
 class Bookmark(models.Model):
@@ -50,9 +46,11 @@ class Bookmark(models.Model):
     def save_snapshot(self):
         try:
             r = requests.get(self.url)
-        except (requests.exceptions.SSLError,
-                requests.exceptions.ConnectionError,
-                requests.exceptions.ReadTimeout) as e:
+        except (
+            requests.exceptions.SSLError,
+            requests.exceptions.ConnectionError,
+            requests.exceptions.ReadTimeout,
+        ) as e:
             print(e)
             return None
 
@@ -66,14 +64,14 @@ class Bookmark(models.Model):
         }
 
         try:
-            ogp = OpenGraph(html=r.content)
+            ogp = LaterOpenGraph(html=r.text)
             snapshot["opengraph_json"] = ogp.to_json()
         except AttributeError:
             print("OpenGraph Error")
             pass
 
         try:
-            snapshot["parsed_content"] = extract_content(r.content)
+            snapshot["parsed_content"] = extract_content(r.text)
         except BlockifyError:
             print("dragnet extract_content: BlockifyError")
             snapshot["parsed_content"] = ""
@@ -89,7 +87,6 @@ class Bookmark(models.Model):
             pass
 
         try:
-            from bookmarks.utils import TextRank4Keyword
             tr4w = TextRank4Keyword()
             tr4w.analyze(snapshot["parsed_content"])
             keywords_weighted = tr4w.node_weight.items()
@@ -103,6 +100,10 @@ class Bookmark(models.Model):
         except MemoryError:
             print("MemoryError while parsing keywords")
             pass
+
+        document = document_fromstring(r.text)
+        self.title = document.find(".//title").text
+        self.save()
 
         return Snapshot.objects.create(**snapshot)
 
