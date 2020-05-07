@@ -11,12 +11,28 @@ from bookmarks.models import Bookmark
 
 
 class Command(BaseCommand):
-    help = 'Saves Bookmark Snapshots from HTTP requests'
+    help = "Saves Bookmark Snapshots from HTTP requests"
+
+    def add_arguments(self, parser):
+        parser.add_argument(
+            "-o", "--offset", type=int, help="Query Offset",
+        )
+        parser.add_argument(
+            "-l", "--limit", type=int, help="Query Limit",
+        )
 
     def handle(self, *args, **kwargs):
-        # Get the next 100 Bookmarks that don't have a Snapshot
-        bookmarks = Bookmark.objects.annotate(Count('snapshots')).filter(snapshots__count=0)[2:1000]
+        offset = kwargs["offset"] if kwargs["offset"] else 0
+        limit = (kwargs["limit"] + offset) if kwargs["limit"] else (10 + offset)
+
+        bookmarks = Bookmark.objects.annotate(Count("snapshots")).filter(
+            snapshots__count=0
+        )[offset:limit]
 
         for bookmark in bookmarks:
-            self.stdout.write(self.style.SUCCESS('Saving Snapshot for Bookmark: "%s"' % bookmark.title))
+            self.stdout.write(
+                self.style.SUCCESS(
+                    'Saving Snapshot for Bookmark: "%s"' % bookmark.title
+                )
+            )
             bookmark.save_snapshot()
