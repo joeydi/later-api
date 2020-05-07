@@ -5,6 +5,14 @@ from .serializers import BookmarkSerializer, TagSerializer
 from .permissions import IsOwner
 
 
+class BookmarkCreateAPIView(generics.CreateAPIView):
+    serializer_class = BookmarkSerializer
+    permission_classes = [permissions.IsAuthenticated, IsOwner]
+
+    def get_queryset(self):
+        user = self.request.user
+        return user.bookmarks.all()
+
 class BookmarkRetrieveUpdateAPIView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = BookmarkSerializer
     permission_classes = [permissions.IsAuthenticated, IsOwner]

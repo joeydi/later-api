@@ -5,6 +5,7 @@ from opengraph_py3 import OpenGraph
 from dragnet import extract_content
 from dragnet.blocks import BlockifyError
 from django.db import models
+from django.dispatch import receiver
 from django.contrib.auth.models import User
 from taggit.managers import TaggableManager
 
@@ -17,14 +18,14 @@ from pprint import pprint
 
 
 class Bookmark(models.Model):
-    created_at = models.DateTimeField()
-    updated_at = models.DateTimeField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="bookmarks")
     url = models.URLField(max_length=2048)
     title = models.CharField(blank=True, max_length=255)
     selection = models.TextField(blank=True)
-    folder = models.CharField(blank=True, max_length=255)
-    tags = TaggableManager()
+    folder = models.CharField(blank=True, max_length=255, default="Unread")
+    tags = TaggableManager(blank=True)
 
     @property
     def status_code(self):
@@ -107,6 +108,12 @@ class Bookmark(models.Model):
 
     class Meta:
         ordering = ["-created_at"]
+
+
+@receiver(models.signals.post_save, sender=Bookmark)
+def execute_after_save(sender, instance, created, *args, **kwargs):
+    if created:
+        instance.save_snapshot()
 
 
 class Snapshot(models.Model):
