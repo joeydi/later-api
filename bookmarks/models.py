@@ -90,13 +90,11 @@ class Bookmark(models.Model):
             tr4w = TextRank4Keyword()
             tr4w.analyze(snapshot["parsed_content"])
             keywords_weighted = tr4w.node_weight.items()
-            tags = [
-                k.lower()
-                for k, v in sorted(
-                    keywords_weighted, key=lambda item: item[1], reverse=True
-                )
-            ]
-            self.tags.add(*tags[:9])
+            keywords_sorted = sorted(
+                keywords_weighted, key=lambda item: item[1], reverse=True
+            )
+            tags = [k.lower() for (k, v) in keywords_sorted if len(k) < 100][:9]
+            self.tags.add(*tags)
         except MemoryError:
             print("MemoryError while parsing keywords")
             pass
