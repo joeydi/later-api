@@ -1,6 +1,6 @@
 import json
 import requests
-from lxml.html import document_fromstring
+from lxml import etree
 from urllib.parse import urlparse
 from dragnet import extract_content
 from dragnet.blocks import BlockifyError
@@ -104,9 +104,13 @@ class Bookmark(models.Model):
         # If the bookmark does not yet have a title, grab it from the document title
         if not self.title:
             try:
-                document = document_fromstring(r.text)
+                parser = etree.XMLParser(recover=True)
+                document = etree.fromstring(r.text, parser)
                 self.title = document.find(".//title").text
                 self.save()
+            except ValueError:
+                print("Error parsing document...")
+                pass
             except AttributeError:
                 print("No title tag found...")
                 pass
