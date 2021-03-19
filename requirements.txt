@@ -15,7 +15,7 @@ Django==3.0.7
 django-cors-headers==3.2.1
 django-environ==0.4.5
 django-taggit==1.2.0
-djangorestframework==3.11.0
+djangorestframework==3.11.2
 dragnet==2.0.4
 en-core-web-sm==2.2.5
 favicon==0.7.0
